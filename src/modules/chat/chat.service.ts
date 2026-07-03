@@ -17,6 +17,15 @@ import type { ChatRequestDto, ChatResponseDto } from './chat.dto.js';
 
 const MAX_TOOL_ROUNDS = 3;
 
+// The free GLM flash tier is ~25s slower per request when `tools` is attached,
+// so the ordering tool is only sent once the conversation shows buying intent.
+const ORDER_INTENT_PATTERN =
+  /\border(s|ing)?\b|\bbuy(ing)?\b|\bpurchase\b|\bquote\b|\bbook(ing)?\b|\bbox(es)?\b|\bpallets?\b|\bcontainers?\b|\bquantity\b|\bmoq\b|\bconfirm\b/i;
+
+const hasOrderIntent = (history: { content: string }[]): boolean => {
+  return history.slice(-6).some((message) => ORDER_INTENT_PATTERN.test(message.content));
+};
+
 const PLACE_ORDER_TOOL: GlmTool = {
   type: 'function',
   function: {
@@ -89,9 +98,10 @@ export const sendChatMessage = async (
     .slice(-CHAT_HISTORY_LIMIT);
 
   const messages: GlmChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT }, ...history];
+  const tools = hasOrderIntent(history) ? [PLACE_ORDER_TOOL] : undefined;
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-    const result = await createChatCompletion(messages, requestId, [PLACE_ORDER_TOOL]);
+    const result = await createChatCompletion(messages, requestId, tools);
 
     if (result.toolCalls.length === 0) {
       if (result.content === null || result.content === '') {
