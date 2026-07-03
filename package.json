@@ -1,0 +1,40 @@
+{
+  "name": "glm-chat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack GLM AI chat test app — Express 5 API + Vite/React frontend served as a single Railway service.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "client"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "dev:client": "npm run dev --workspace client",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "tsc -p tsconfig.json",
+    "build:client": "npm run build --workspace client",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json && npm run typecheck --workspace client"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.10",
+    "pino-pretty": "^13.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
