@@ -60,6 +60,9 @@ export const createChatCompletion = async (
         model: env.GLM_MODEL,
         messages,
         stream: false,
+        // GLM-4.5 models reason ("think") before answering by default, which adds
+        // 30-50s of latency on the flash tier. Chat answers don't need it.
+        thinking: { type: 'disabled' },
         ...(tools !== undefined && tools.length > 0 ? { tools, tool_choice: 'auto' } : {}),
       }),
       signal: AbortSignal.timeout(GLM_REQUEST_TIMEOUT_MS),
