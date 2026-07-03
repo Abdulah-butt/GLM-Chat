@@ -77,8 +77,6 @@ export const openApiSpec = {
                   message: 'Reply generated successfully.',
                   data: {
                     reply: { role: 'assistant', content: 'Hi! I can answer questions...' },
-                    model: 'glm-4.5-flash',
-                    usage: { promptTokens: 20, completionTokens: 15, totalTokens: 35 },
                   },
                 },
               },

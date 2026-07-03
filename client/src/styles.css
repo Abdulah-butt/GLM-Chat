@@ -1,26 +1,27 @@
 :root {
-  /* KodingKlouds brand palette */
-  --bg-top: #0a0f2d;
-  --bg-mid: #05070f;
-  --bg-bottom: #020409;
+  /* Blue Crown Seafood brand palette — Maritime Modernism */
+  --bg-top: #0a1628;
+  --bg-mid: #071020;
+  --bg-bottom: #040a14;
   --surface: rgba(255, 255, 255, 0.05);
   --surface-strong: rgba(255, 255, 255, 0.08);
   --border: rgba(255, 255, 255, 0.1);
   --border-hover: rgba(255, 255, 255, 0.22);
-  --text: #f4f6fb;
+  --text: #f8fafc;
   --text-muted: #94a3b8;
-  --primary: #d60000;
-  --primary-light: #ff0a0a;
-  --primary-dark: #b80000;
-  --accent-cyan: #00ffff;
-  --cyan-soft: rgba(0, 255, 255, 0.12);
-  --gradient-accent: linear-gradient(90deg, #00ffff, #ffffff 55%, #ff0000);
-  --error-bg: rgba(214, 0, 0, 0.14);
-  --error-border: rgba(255, 10, 10, 0.4);
+  --primary: #0ea5e9;
+  --primary-light: #38bdf8;
+  --primary-dark: #0284c7;
+  --accent-cyan: #38bdf8;
+  --cyan-soft: rgba(14, 165, 233, 0.16);
+  --gold: #d4a853;
+  --gradient-accent: linear-gradient(90deg, #38bdf8, #ffffff 55%, #d4a853);
+  --error-bg: rgba(214, 60, 60, 0.14);
+  --error-border: rgba(255, 110, 110, 0.4);
   --error-text: #ffb4b4;
   --radius: 1rem;
-  --font-heading: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-body: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 * {
@@ -183,7 +184,7 @@ body {
   background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
   color: #fff;
   border-bottom-right-radius: 5px;
-  box-shadow: 0 4px 18px rgba(214, 0, 0, 0.25);
+  box-shadow: 0 4px 18px rgba(14, 165, 233, 0.25);
 }
 
 .bubble.assistant {
@@ -388,7 +389,7 @@ body {
   color: #fff;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(214, 0, 0, 0.35);
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
   transition: filter 0.15s, opacity 0.15s;
 }
 
@@ -416,6 +417,117 @@ body {
 
 .footer-note a:hover {
   text-decoration: underline;
+}
+
+/* ── Header nav ─────────────────────────────────────────── */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13.5px;
+  padding: 7px 12px;
+  border-radius: 0.6rem;
+  border: 1px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+.nav-link.active {
+  color: var(--gold);
+  border-color: rgba(212, 168, 83, 0.4);
+  background: rgba(212, 168, 83, 0.08);
+}
+
+/* ── Sales dashboard ────────────────────────────────────── */
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  color: var(--gold);
+}
+
+.dashboard-header p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 13.5px;
+}
+
+.dashboard-note {
+  color: var(--text-muted);
+  padding: 24px 0;
+  text-align: center;
+}
+
+.orders-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface);
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 760px;
+}
+
+.orders-table th,
+.orders-table td {
+  text-align: left;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.orders-table th {
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.orders-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.order-number {
+  font-weight: 600;
+  color: var(--accent-cyan);
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  background: rgba(212, 168, 83, 0.14);
+  border: 1px solid rgba(212, 168, 83, 0.4);
+  color: var(--gold);
 }
 
 /* ── Responsive ─────────────────────────────────────────── */

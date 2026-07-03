@@ -19,7 +19,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps): JSX.Elem
         <div key={message.id} className={`message-row ${message.role}`}>
           {message.role === 'assistant' && (
             <span className="avatar" aria-hidden="true">
-              <img src="/kodingklouds-icon.png" alt="" />
+              <img src="/bluecrown-crown.svg" alt="" />
             </span>
           )}
           <div className={`bubble ${message.role}`}>{message.content}</div>
@@ -28,7 +28,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps): JSX.Elem
       {isLoading && (
         <div className="message-row assistant">
           <span className="avatar" aria-hidden="true">
-            <img src="/kodingklouds-icon.png" alt="" />
+            <img src="/bluecrown-crown.svg" alt="" />
           </span>
           <div className="bubble assistant typing" aria-label="Assistant is typing">
             <span className="dot" />

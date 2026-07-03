@@ -4,27 +4,40 @@ import { AppError } from '../../core/errors/AppError.js';
 import { HTTP_STATUS } from '../../core/http/statusCodes.js';
 import { logger } from '../logger/logger.js';
 
-export interface GlmChatMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
+export interface GlmToolCall {
+  id: string;
+  type: 'function';
+  function: { name: string; arguments: string };
 }
 
-export interface GlmUsage {
-  promptTokens: number;
-  completionTokens: number;
-  totalTokens: number;
+export type GlmChatMessage =
+  | { role: 'system' | 'user'; content: string }
+  | { role: 'assistant'; content: string | null; tool_calls?: GlmToolCall[] }
+  | { role: 'tool'; content: string; tool_call_id: string };
+
+export interface GlmTool {
+  type: 'function';
+  function: {
+    name: string;
+    description: string;
+    parameters: Record<string, unknown>;
+  };
 }
 
 export interface GlmChatResult {
-  content: string;
+  content: string | null;
+  toolCalls: GlmToolCall[];
   model: string;
-  usage?: GlmUsage;
 }
 
 interface GlmApiResponse {
   model?: string;
-  choices?: { message?: { content?: string } }[];
-  usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+  choices?: {
+    message?: {
+      content?: string | null;
+      tool_calls?: { id?: string; function?: { name?: string; arguments?: string } }[];
+    };
+  }[];
 }
 
 const UPSTREAM_UNAVAILABLE_MESSAGE = 'The AI service is temporarily unavailable. Please try again.';
@@ -32,6 +45,7 @@ const UPSTREAM_UNAVAILABLE_MESSAGE = 'The AI service is temporarily unavailable.
 export const createChatCompletion = async (
   messages: GlmChatMessage[],
   requestId: string,
+  tools?: GlmTool[],
 ): Promise<GlmChatResult> => {
   let response: globalThis.Response;
 
@@ -42,7 +56,12 @@ export const createChatCompletion = async (
         'Content-Type': 'application/json',
         Authorization: `Bearer ${env.GLM_API_KEY}`,
       },
-      body: JSON.stringify({ model: env.GLM_MODEL, messages, stream: false }),
+      body: JSON.stringify({
+        model: env.GLM_MODEL,
+        messages,
+        stream: false,
+        ...(tools !== undefined && tools.length > 0 ? { tools, tool_choice: 'auto' } : {}),
+      }),
       signal: AbortSignal.timeout(GLM_REQUEST_TIMEOUT_MS),
     });
   } catch (err) {
@@ -75,25 +94,23 @@ export const createChatCompletion = async (
   }
 
   const payload = (await response.json().catch(() => null)) as GlmApiResponse | null;
-  const content = payload?.choices?.[0]?.message?.content;
+  const message = payload?.choices?.[0]?.message;
 
-  if (typeof content !== 'string' || content.length === 0) {
+  const toolCalls: GlmToolCall[] = (message?.tool_calls ?? [])
+    .filter(
+      (call): call is { id: string; function: { name: string; arguments: string } } =>
+        typeof call.id === 'string' &&
+        typeof call.function?.name === 'string' &&
+        typeof call.function?.arguments === 'string',
+    )
+    .map((call) => ({ id: call.id, type: 'function' as const, function: call.function }));
+
+  const content = typeof message?.content === 'string' ? message.content : null;
+
+  if ((content === null || content === '') && toolCalls.length === 0) {
     logger.error({ requestId }, 'GLM API returned an unexpected response shape');
     throw new AppError(ERROR_CODES.GLM_API_ERROR, UPSTREAM_UNAVAILABLE_MESSAGE, HTTP_STATUS.BAD_GATEWAY);
   }
 
-  const usage = payload?.usage;
-  return {
-    content,
-    model: payload?.model ?? env.GLM_MODEL,
-    ...(usage !== undefined
-      ? {
-          usage: {
-            promptTokens: usage.prompt_tokens ?? 0,
-            completionTokens: usage.completion_tokens ?? 0,
-            totalTokens: usage.total_tokens ?? 0,
-          },
-        }
-      : {}),
-  };
+  return { content, toolCalls, model: payload?.model ?? env.GLM_MODEL };
 };

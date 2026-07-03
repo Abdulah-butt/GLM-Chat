@@ -6,14 +6,21 @@ export interface ChatMessage {
   content: string;
 }
 
-export interface ChatUsage {
-  promptTokens: number;
-  completionTokens: number;
-  totalTokens: number;
-}
-
 export interface ChatResponseData {
   reply: { role: 'assistant'; content: string };
-  model: string;
-  usage?: ChatUsage;
+}
+
+export interface OrderRequest {
+  orderNumber: string;
+  packageType: '5kg_box' | '10kg_box' | 'full_pallet' | 'container';
+  filletSize: 'small' | 'medium' | 'large';
+  quantity: number;
+  destination: string;
+  companyName: string;
+  contactName?: string;
+  email: string;
+  phone?: string;
+  notes?: string;
+  status: string;
+  createdAt: string;
 }

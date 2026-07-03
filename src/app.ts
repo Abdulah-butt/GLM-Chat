@@ -11,6 +11,7 @@ import { httpLogger } from './infra/logger/httpLogger.js';
 import { requestId } from './middlewares/requestId.middleware.js';
 import { apiRateLimit } from './middlewares/rateLimit.middleware.js';
 import { chatRoutes } from './modules/chat/chat.routes.js';
+import { ordersRoutes } from './modules/orders/orders.routes.js';
 import { healthRoutes } from './modules/health/health.routes.js';
 import { openApiSpec } from './docs/openapi.js';
 
@@ -66,6 +67,7 @@ export const createApp = (): Express => {
 
   app.use(API_BASE_PATH, apiRateLimit);
   app.use(`${API_BASE_PATH}/chat`, chatRoutes);
+  app.use(`${API_BASE_PATH}/orders`, ordersRoutes);
 
   if (!isProduction) {
     app.get('/api/docs', (_req, res) => {
