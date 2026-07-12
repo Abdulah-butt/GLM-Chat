@@ -9,6 +9,14 @@ const envSchema = z.object({
   GLM_API_KEY: z.string().default(''),
   GLM_BASE_URL: z.string().url().default('https://api.z.ai/api/paas/v4'),
   GLM_MODEL: z.string().min(1).default('glm-4.5-flash'),
+  GLM_OCR_MODEL: z.string().min(1).default('glm-4.6v-flash'),
+  GLM_ANALYSIS_MODEL: z.string().min(1).default('glm-4.7-flash'),
+
+  DOCTOR_OCR_MAX_FILE_MB: z.coerce.number().positive().max(50).default(10),
+  DOCTOR_OCR_MAX_PAGES: z.coerce.number().int().positive().max(100).default(20),
+  DOCTOR_OCR_TIMEOUT_MS: z.coerce.number().int().positive().default(90_000),
+  DOCTOR_OCR_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(600_000),
+  DOCTOR_OCR_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(5),
 
   CORS_ORIGINS: z.string().default('http://localhost:5173,http://localhost:3000'),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900_000),

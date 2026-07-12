@@ -30,7 +30,7 @@ export interface GlmChatResult {
   model: string;
 }
 
-interface GlmApiResponse {
+export interface GlmApiResponse {
   model?: string;
   choices?: {
     message?: {
@@ -42,11 +42,13 @@ interface GlmApiResponse {
 
 const UPSTREAM_UNAVAILABLE_MESSAGE = 'The AI service is temporarily unavailable. Please try again.';
 
-export const createChatCompletion = async (
-  messages: GlmChatMessage[],
+// Low-level chat-completions request with shared error mapping. Used by the chat
+// flow below and by other modules (e.g. doctor-ocr) that need custom bodies.
+export const glmChatRequest = async (
+  body: Record<string, unknown>,
   requestId: string,
-  tools?: GlmTool[],
-): Promise<GlmChatResult> => {
+  timeoutMs: number = GLM_REQUEST_TIMEOUT_MS,
+): Promise<GlmApiResponse> => {
   let response: globalThis.Response;
 
   try {
@@ -56,16 +58,8 @@ export const createChatCompletion = async (
         'Content-Type': 'application/json',
         Authorization: `Bearer ${env.GLM_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: env.GLM_MODEL,
-        messages,
-        stream: false,
-        // GLM-4.5 models reason ("think") before answering by default, which adds
-        // 30-50s of latency on the flash tier. Chat answers don't need it.
-        thinking: { type: 'disabled' },
-        ...(tools !== undefined && tools.length > 0 ? { tools, tool_choice: 'auto' } : {}),
-      }),
-      signal: AbortSignal.timeout(GLM_REQUEST_TIMEOUT_MS),
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (err) {
     if (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
@@ -97,7 +91,32 @@ export const createChatCompletion = async (
   }
 
   const payload = (await response.json().catch(() => null)) as GlmApiResponse | null;
-  const message = payload?.choices?.[0]?.message;
+  if (payload === null) {
+    logger.error({ requestId }, 'GLM API returned a non-JSON response');
+    throw new AppError(ERROR_CODES.GLM_API_ERROR, UPSTREAM_UNAVAILABLE_MESSAGE, HTTP_STATUS.BAD_GATEWAY);
+  }
+  return payload;
+};
+
+export const createChatCompletion = async (
+  messages: GlmChatMessage[],
+  requestId: string,
+  tools?: GlmTool[],
+): Promise<GlmChatResult> => {
+  const payload = await glmChatRequest(
+    {
+      model: env.GLM_MODEL,
+      messages,
+      stream: false,
+      // GLM-4.5 models reason ("think") before answering by default, which adds
+      // 30-50s of latency on the flash tier. Chat answers don't need it.
+      thinking: { type: 'disabled' },
+      ...(tools !== undefined && tools.length > 0 ? { tools, tool_choice: 'auto' } : {}),
+    },
+    requestId,
+  );
+
+  const message = payload.choices?.[0]?.message;
 
   const toolCalls: GlmToolCall[] = (message?.tool_calls ?? [])
     .filter(

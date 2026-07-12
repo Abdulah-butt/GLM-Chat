@@ -1,0 +1,98 @@
+export const MARKER_STATUSES = [
+  'low',
+  'normal',
+  'high',
+  'critical-low',
+  'critical-high',
+  'abnormal',
+  'unknown',
+] as const;
+export type MarkerStatus = (typeof MARKER_STATUSES)[number];
+
+export const URGENCY_LEVELS = ['routine', 'soon', 'prompt'] as const;
+export type UrgencyLevel = (typeof URGENCY_LEVELS)[number];
+
+export interface MarkerReferenceRange {
+  raw: string | null;
+  minimum: number | null;
+  maximum: number | null;
+}
+
+export interface AnalyzedMarker {
+  id: string;
+  originalName: string;
+  label: string;
+  testCode: string | null;
+  rawValue: string;
+  numericValue: number | null;
+  unit: string | null;
+  referenceRange: MarkerReferenceRange;
+  status: MarkerStatus;
+  reportFlag: string | null;
+  explanation: string;
+  resultInterpretation: string;
+  confidence: number;
+  sourcePage: number | null;
+  warnings: string[];
+}
+
+export interface SuggestedDoctorQuestion {
+  id: string;
+  question: string;
+  reason: string;
+  relatedMarkerIds: string[];
+}
+
+export interface AnalysisSummary {
+  overview: string;
+  importantFindings: string[];
+  normalFindings: string[];
+  pointsToDiscussWithDoctor: string[];
+  urgency: UrgencyLevel;
+  disclaimer: string;
+}
+
+export interface AnalysisResult {
+  schemaVersion: '1.0';
+  analysisId: string;
+  status: 'completed' | 'partial';
+  source: {
+    fileName: string;
+    fileType: 'application/pdf';
+    pageCount: number;
+    uploadedAt: string;
+    analyzedAt: string;
+    ocrModel: string;
+    analysisModel: string;
+  };
+  report: {
+    reportType: string | null;
+    medicalSpecialty: string | null;
+    laboratoryName: string | null;
+    hospitalName: string | null;
+    reportNumber: string | null;
+    sampleCollectedAt: string | null;
+    reportIssuedAt: string | null;
+  };
+  patient: {
+    name: string | null;
+    age: string | null;
+    dateOfBirth: string | null;
+    gender: string | null;
+    patientId: string | null;
+  };
+  doctor: {
+    name: string | null;
+    specialty: string | null;
+    clinicOrHospital: string | null;
+  };
+  markers: AnalyzedMarker[];
+  summary: AnalysisSummary;
+  suggestedDoctorQuestions: SuggestedDoctorQuestion[];
+  quality: {
+    overallConfidence: number;
+    missingInformation: string[];
+    warnings: string[];
+    requiresManualReview: boolean;
+  };
+}

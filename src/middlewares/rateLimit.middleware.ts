@@ -39,3 +39,9 @@ export const chatRateLimit = createRateLimiter({
   max: env.CHAT_RATE_LIMIT_MAX,
   message: 'Too many messages. Please wait a moment before sending more.',
 });
+
+export const doctorOcrRateLimit = createRateLimiter({
+  windowMs: env.DOCTOR_OCR_RATE_LIMIT_WINDOW_MS,
+  max: env.DOCTOR_OCR_RATE_LIMIT_MAX,
+  message: 'Too many reports analyzed recently. Please wait a few minutes and try again.',
+});
